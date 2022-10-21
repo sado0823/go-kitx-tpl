@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package helloworld.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/sado0823/go-kitx/tpl/api/helloworld/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kitx.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+message AddBookRequest {
+    string name = 1;
+    int64 price = 2;
+}
+
+message AddBookReply {
+    string message = 1;
+    int64 price = 2;
+}
+
+message ShopListRequest {
+    string name = 1;
+    int64 size = 2;
+}
+
+message Shop {
+    string name = 1;
+    string address = 2;
+}
+
+message ShopListReply {
+    repeated Shop shops = 1;
+}
+
+service Greeter {
+
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+            get: "/helloworld/{name}"
+        };
+    }
+
+    rpc AddBook (AddBookRequest) returns (AddBookReply) {
+        option (google.api.http) = {
+            post: "/book/add"
+            body: "*"
+        };
+    }
+
+    rpc ShopList(ShopListRequest) returns (ShopListReply) {
+        option (google.api.http) = {
+          get: "/shop/list"
+        };
+    }
+}
+
+
