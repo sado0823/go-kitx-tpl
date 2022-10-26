@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/sado0823/go-kitx/kit/log"
+	"github.com/sado0823/go-kitx/kit/tracing"
 )
 
 type (
 	ShopRepo interface {
-		Save(ctx context.Context, shop *Shop) (*Shop, error)
 		ListAll(context.Context) ([]*Shop, error)
 	}
 
 	Shop struct {
-		ID     int64  `json:"id"`
-		Name   string `json:"name"`
-		Author string `json:"author"`
+		ID      int64  `json:"id"`
+		Name    string `json:"name"`
+		Address string `json:"address"`
 	}
 
 	shopRepo struct {
@@ -25,14 +25,15 @@ type (
 )
 
 func newShopRepo(data *dao, logger log.Logger) ShopRepo {
-	return &shopRepo{data, log.NewHelper(log.WithFields(logger, "pkg", "shopRepo"))}
+	return &shopRepo{data, log.NewHelper(log.WithFields(logger, "pkg", "ShopRepo"))}
 }
 
-func (r *shopRepo) Save(ctx context.Context, g *Shop) (*Shop, error) {
-	r.log.Errorf("i am greeterRepo!!!")
-	return g, nil
-}
-
-func (r *shopRepo) ListAll(context.Context) ([]*Shop, error) {
-	return nil, nil
+func (r *shopRepo) ListAll(ctx context.Context) ([]*Shop, error) {
+	r.log.WithContext(ctx).Warnf("shop list all")
+	ctx, span := tracing.Get("go-kitx").Start(ctx, "shopRepo.ListAll")
+	span.End()
+	return []*Shop{
+		{ID: 1, Name: "shop1", Address: "address1"},
+		{ID: 2, Name: "shop2", Address: "address2"},
+	}, nil
 }

@@ -33,7 +33,7 @@ func NewDao(c *conf.Data, logger log.Logger) (*Dao, func(), error) {
 
 	data := &dao{conf: c}
 	toNew := []func(c *conf.Data, data *dao) error{
-		newRedis, newMysql,
+		//newRedis, newMysql,
 	}
 
 	for _, fn := range toNew {

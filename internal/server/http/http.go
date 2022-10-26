@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/wire"
 
+	"github.com/sado0823/go-kitx/kit/log"
+	"github.com/sado0823/go-kitx/kit/tracing"
 	v1 "github.com/sado0823/go-kitx/tpl/api/helloworld/v1"
 	"github.com/sado0823/go-kitx/tpl/internal/conf"
 	"github.com/sado0823/go-kitx/tpl/internal/service"
-	"github.com/sado0823/go-kitx/transport/pbchain"
-
-	"github.com/sado0823/go-kitx/kit/log"
 	"github.com/sado0823/go-kitx/transport/http"
+	"github.com/sado0823/go-kitx/transport/pbchain"
 )
 
 var ProviderSet = wire.NewSet(NewServer)
@@ -21,7 +21,8 @@ func NewServer(c *conf.Server, svc *service.Service, logger log.Logger) *http.Se
 		opts = []http.ServerOption{
 			http.WithServerPBChain(
 				pbchain.Recovery(),
-				pbchain.LoggingServer(logger),
+				tracing.Server(),
+				pbchain.LoggingServer(),
 			),
 		}
 		matches = []bool{
@@ -56,25 +57,24 @@ func NewServer(c *conf.Server, svc *service.Service, logger log.Logger) *http.Se
 
 func _ping(svc *service.Service) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.HelloRequest
+		var in = make(map[string]interface{})
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
+
 		// can not remove this handler wrapper !!! or http pbchain would be invalid
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return svc.SayHello(ctx, req.(*v1.HelloRequest))
+			// do service logic
+			v := req.(map[string]interface{})
+			v["wrapper"] = "pong"
+			return v, nil
 		})
 
-		out, err := h(ctx, &in)
+		out, err := h(ctx, in)
 		if err != nil {
 			return err
 		}
 
-		reply := out.(*v1.HelloReply)
-		reply.Message += "customer http router"
-		return ctx.JSON(200, reply)
+		return ctx.JSON(200, out)
 	}
 }

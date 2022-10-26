@@ -8,9 +8,9 @@ import (
 )
 
 type Base struct {
-	ID      string
-	Name    string
-	Version string
+	ID            string
+	Name          string
+	Version       string
 }
 
 func newApp(base *Base, logger log.Logger, gs *grpc.Server, hs *http.Server) *kitx.App {

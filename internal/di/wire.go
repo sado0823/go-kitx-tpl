@@ -18,7 +18,7 @@ import (
 	"github.com/google/wire"
 )
 
-// wireApp init kitx application.
+// WireApp init kitx application.
 func WireApp(*Base, *conf.Server, *conf.Data, log.Logger) (*kitx.App, func(), error) {
 	panic(wire.Build(dao.ProviderSet, service.ProviderSet, http.ProviderSet, grpc.ProviderSet, newApp))
 }

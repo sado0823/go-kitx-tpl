@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	stdLog "log"
 	"os"
 
+	"github.com/sado0823/go-kitx/kit/tracing"
 	"github.com/sado0823/go-kitx/tpl/internal/conf"
 	"github.com/sado0823/go-kitx/tpl/internal/di"
 
@@ -16,14 +18,16 @@ import (
 
 // go build -ldflags "-X 'main.Version=x.y.z' -X 'main.Name=demo'"
 var (
-	base         = new(di.Base)
-	flagConfFile string
-	Name         string
-	Version      string
+	base          = new(di.Base)
+	flagConfFile  string
+	Name          string
+	Version       string
+	TraceEndpoint string
 )
 
 func init() {
 	flag.StringVar(&flagConfFile, "conf", "../configs/config.yaml", "config path, eg: -conf config.yaml")
+	flag.StringVar(&TraceEndpoint, "trace", "http://localhost:14268/api/traces", "trace endpoint")
 	base.ID, _ = os.Hostname()
 	base.Name = Name
 	base.Version = Version
@@ -32,12 +36,19 @@ func init() {
 func main() {
 	flag.Parse()
 
-	logger := log.WithFields(log.GetGlobal(),
+	if err := tracing.Init(TraceEndpoint, base.Name+base.ID); err != nil {
+		panic(err)
+	}
+
+	//logger := log.WithFields(log.GetGlobal(),
+	logger := log.WithFields(log.NewStd(stdLog.Writer()),
+		"ts", log.DefaultTimestamp,
+		"caller", log.DefaultCaller,
 		"service.id", base.ID,
 		"service.name", base.Name,
 		"service.version", base.Version,
-		//"trace.id", tracing.TraceID(),
-		//"span.id", tracing.SpanID(),
+		"trace.id", tracing.TraceID(),
+		"span.id", tracing.SpanID(),
 	)
 
 	c := config.New(

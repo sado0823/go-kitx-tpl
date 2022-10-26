@@ -4,12 +4,12 @@ import (
 	"github.com/google/wire"
 
 	"github.com/sado0823/go-kitx/kit/log"
-	"github.com/sado0823/go-kitx/transport/pbchain"
-
+	"github.com/sado0823/go-kitx/kit/tracing"
 	v1 "github.com/sado0823/go-kitx/tpl/api/helloworld/v1"
 	"github.com/sado0823/go-kitx/tpl/internal/conf"
 	"github.com/sado0823/go-kitx/tpl/internal/service"
 	"github.com/sado0823/go-kitx/transport/grpc"
+	"github.com/sado0823/go-kitx/transport/pbchain"
 )
 
 var ProviderSet = wire.NewSet(NewServer)
@@ -19,7 +19,8 @@ func NewServer(c *conf.Server, svc *service.Service, logger log.Logger) *grpc.Se
 		opts = []grpc.ServerOption{
 			grpc.WithServerPBChain(
 				pbchain.Recovery(),
-				pbchain.LoggingServer(logger),
+				tracing.Server(),
+				pbchain.LoggingServer(),
 			),
 		}
 		matches = []bool{

@@ -3,6 +3,7 @@ syntax = "proto3";
 package helloworld.v1;
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "github.com/sado0823/go-kitx/tpl/api/helloworld/v1;v1";
 option java_multiple_files = true;
@@ -59,6 +60,12 @@ service Greeter {
     rpc ShopList(ShopListRequest) returns (ShopListReply) {
         option (google.api.http) = {
           get: "/shop/list"
+        };
+    }
+
+    rpc GotError(.google.protobuf.Empty) returns (.google.protobuf.Empty) {
+        option(google.api.http) = {
+            get: "/error"
         };
     }
 }
