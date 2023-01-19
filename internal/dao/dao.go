@@ -5,9 +5,8 @@ import (
 
 	"github.com/sado0823/go-kitx/errorx"
 	"github.com/sado0823/go-kitx/kit/log"
-	"github.com/sado0823/go-kitx/kit/store/mysql"
 	"github.com/sado0823/go-kitx/kit/store/redis"
-
+	"github.com/sado0823/go-kitx/kit/store/sqlx"
 	"github.com/sado0823/go-kitx/tpl/internal/conf"
 
 	"github.com/google/wire"
@@ -25,7 +24,7 @@ type (
 	dao struct {
 		conf  *conf.Data
 		redis *redis.Redis
-		mysql *mysql.Mysql
+		mysql sqlx.Conn
 	}
 )
 
@@ -64,6 +63,6 @@ func newRedis(c *conf.Data, data *dao) error {
 }
 
 func newMysql(c *conf.Data, data *dao) (err error) {
-	data.mysql, err = mysql.New(c.Database.Source)
+	data.mysql, err = sqlx.NewMysql(c.Database.Source)
 	return err
 }
